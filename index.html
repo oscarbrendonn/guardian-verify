@@ -32,20 +32,21 @@
             z-index: 0;
         }
 
-        /* 67 pattern background */
+        /* 67 coin logo pattern background */
         .bg-pattern {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: -50px; left: -50px; right: -50px; bottom: -50px;
             z-index: 0;
-            opacity: 0.07;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='36' fill='%23d4af37'%3E67%3C/text%3E%3C/svg%3E");
-            background-size: 80px 80px;
-            animation: bgFloat 25s linear infinite;
+            opacity: 0.06;
+            background-image: url("67logo.png");
+            background-size: 70px 70px;
+            background-repeat: repeat;
+            animation: bgFloat 30s linear infinite;
         }
 
         @keyframes bgFloat {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-80px) rotate(0deg); }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-70px); }
         }
 
         .container {
