@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guardian Verification</title>
+    <title>67 Guardian Verification</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -25,32 +21,31 @@
             position: relative;
         }
 
-        /* Animated background pattern */
         body::before {
             content: '';
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 200, 83, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 200, 83, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(0, 150, 83, 0.06) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(212, 175, 55, 0.06) 0%, transparent 50%);
             z-index: 0;
         }
 
-        /* Floating icons background */
-        .bg-icons {
+        /* 67 pattern background */
+        .bg-pattern {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 0;
-            opacity: 0.06;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 24 24' fill='none' stroke='%2300c853' stroke-width='1.5'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3C/svg%3E");
+            opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' font-family='Arial,sans-serif' font-weight='900' font-size='36' fill='%23d4af37'%3E67%3C/text%3E%3C/svg%3E");
             background-size: 80px 80px;
-            animation: bgFloat 20s linear infinite;
+            animation: bgFloat 25s linear infinite;
         }
 
         @keyframes bgFloat {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-80px); }
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-80px) rotate(0deg); }
         }
 
         .container {
@@ -64,32 +59,56 @@
             max-width: 400px;
         }
 
-        /* Shield icon */
-        .shield-container {
-            width: 88px;
-            height: 88px;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #00c853, #00a844);
+        /* 67 Coin Logo */
+        .logo-container {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #b8962e, #d4af37);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 24px;
-            box-shadow: 0 8px 32px rgba(0, 200, 83, 0.3);
-            animation: shieldPulse 2s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px rgba(212, 175, 55, 0.4),
+                0 0 60px rgba(212, 175, 55, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            animation: logoPulse 2.5s ease-in-out infinite;
+            position: relative;
         }
 
-        @keyframes shieldPulse {
-            0%, 100% { box-shadow: 0 8px 32px rgba(0, 200, 83, 0.3); }
-            50% { box-shadow: 0 8px 48px rgba(0, 200, 83, 0.5); }
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #8b6914, #d4af37, #f0d060);
+            z-index: -1;
         }
 
-        .shield-container svg {
-            width: 44px;
-            height: 44px;
-            fill: white;
+        .logo-container::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            z-index: 0;
         }
 
-        /* Welcome text */
+        .logo-text {
+            font-size: 38px;
+            font-weight: 900;
+            color: #d4af37;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-family: 'Arial Black', Arial, sans-serif;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), 0 0 60px rgba(212, 175, 55, 0.15); }
+            50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.6), 0 0 80px rgba(212, 175, 55, 0.25); }
+        }
+
         .welcome-text {
             font-size: 16px;
             color: rgba(255, 255, 255, 0.6);
@@ -98,39 +117,38 @@
 
         .group-name {
             font-size: 15px;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(212, 175, 55, 0.6);
             margin-bottom: 20px;
         }
 
-        /* Title */
         .title {
             font-size: 28px;
             font-weight: 700;
-            background: linear-gradient(135deg, #00e676, #00c853);
+            background: linear-gradient(135deg, #f0d060, #d4af37);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
             text-align: center;
         }
 
         .subtitle {
             font-size: 15px;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.45);
             margin-bottom: 36px;
             text-align: center;
         }
 
-        /* Verify button */
+        /* Verify button — gold theme */
         .verify-btn {
             width: 100%;
             padding: 16px 32px;
             border: none;
             border-radius: 14px;
-            background: linear-gradient(135deg, #00e676, #00c853);
+            background: linear-gradient(135deg, #f0d060, #d4af37, #b8962e);
             color: #000;
             font-size: 17px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             letter-spacing: 0.3px;
@@ -143,32 +161,16 @@
             position: absolute;
             top: 0; left: -100%;
             width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
         }
 
-        .verify-btn:hover::before {
-            left: 100%;
-        }
+        .verify-btn:hover::before { left: 100%; }
+        .verify-btn:active { transform: scale(0.98); }
+        .verify-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .verify-btn:active {
-            transform: scale(0.98);
-        }
-
-        .verify-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Loading state */
-        .verify-btn.loading {
-            pointer-events: none;
-        }
-
-        .verify-btn.loading .btn-text {
-            visibility: hidden;
-        }
-
+        .verify-btn.loading { pointer-events: none; }
+        .verify-btn.loading .btn-text { visibility: hidden; }
         .verify-btn.loading::after {
             content: '';
             position: absolute;
@@ -181,86 +183,85 @@
             animation: spin 0.6s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Success state */
         .verify-btn.success {
-            background: #00c853;
+            background: linear-gradient(135deg, #00e676, #00c853);
             pointer-events: none;
         }
 
-        /* Warning footer */
+        /* Warning */
         .warning {
             margin-top: 32px;
             padding: 14px 18px;
-            border: 1px solid rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 12px;
-            background: rgba(255, 193, 7, 0.06);
+            background: rgba(212, 175, 55, 0.06);
             display: flex;
             align-items: flex-start;
             gap: 10px;
             width: 100%;
         }
 
-        .warning-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
+        .warning-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
         .warning-text {
             font-size: 13px;
-            color: rgba(255, 193, 7, 0.8);
+            color: rgba(212, 175, 55, 0.8);
             line-height: 1.4;
         }
 
-        /* Footer branding */
+        /* Footer */
         .footer {
             margin-top: 24px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            color: rgba(212, 175, 55, 0.35);
             display: flex;
             align-items: center;
             gap: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        .footer svg {
-            width: 14px;
-            height: 14px;
-            fill: rgba(255, 255, 255, 0.2);
+        .footer-67 {
+            font-size: 16px;
+            font-weight: 900;
+            color: rgba(212, 175, 55, 0.5);
+        }
+
+        /* Powered by line */
+        .powered {
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.15);
         }
     </style>
 </head>
 <body>
-    <div class="bg-icons"></div>
+    <div class="bg-pattern"></div>
     <div class="container">
-        <div class="shield-container">
-            <svg viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-            </svg>
+        <div class="logo-container">
+            <span class="logo-text">67</span>
         </div>
 
         <div class="welcome-text" id="welcomeText">Welcome</div>
         <div class="group-name" id="groupName"></div>
 
-        <div class="title">Human Verification</div>
-        <div class="subtitle">Verify below to be granted entry</div>
+        <div class="title">67 Guardian</div>
+        <div class="subtitle">Verify to join the community</div>
 
         <button class="verify-btn" id="verifyBtn" onclick="handleVerify()">
             <span class="btn-text">Click here to verify</span>
         </button>
 
         <div class="warning">
-            <span class="warning-icon">⚠️</span>
-            <span class="warning-text">We will never ask you for phone number or any personal information</span>
+            <span class="warning-icon">🛡️</span>
+            <span class="warning-text">We will never ask for your phone number, seed phrase, or any personal information</span>
         </div>
 
         <div class="footer">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Guardian
+            <span class="footer-67">67</span> Guardian
         </div>
+        <div class="powered">Protecting the 67 community</div>
     </div>
 
     <script>
@@ -268,19 +269,15 @@
         tg.ready();
         tg.expand();
 
-        // Set theme
         document.body.style.backgroundColor = tg.themeParams.bg_color || '#0a0e14';
 
-        // Parse URL params
         const params = new URLSearchParams(window.location.search);
         const chatId = params.get('chat_id') || '';
         const groupName = params.get('group_name') || '';
 
-        // Set welcome text with user name
         const user = tg.initDataUnsafe?.user;
         if (user) {
-            document.getElementById('welcomeText').textContent = 
-                `Welcome, ${user.first_name}`;
+            document.getElementById('welcomeText').textContent = `Welcome, ${user.first_name}`;
         }
 
         if (groupName) {
@@ -297,7 +294,6 @@
                 btn.querySelector('.btn-text').textContent = '✓ Verified';
                 btn.querySelector('.btn-text').style.visibility = 'visible';
 
-                // Deep link back to bot — triggers /start verified_CHATID
                 setTimeout(() => {
                     const deepLink = `https://t.me/Guardian67bot?start=verified_${chatId}`;
                     tg.openTelegramLink(deepLink);
