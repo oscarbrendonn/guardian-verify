@@ -291,24 +291,18 @@
             const btn = document.getElementById('verifyBtn');
             btn.classList.add('loading');
 
-            // Small delay for visual feedback
             setTimeout(() => {
-                // Send verification data back to bot
-                tg.sendData(JSON.stringify({
-                    action: 'verify',
-                    chat_id: chatId,
-                    timestamp: Date.now()
-                }));
-
                 btn.classList.remove('loading');
                 btn.classList.add('success');
                 btn.querySelector('.btn-text').textContent = '✓ Verified';
                 btn.querySelector('.btn-text').style.visibility = 'visible';
 
-                // Close after short delay
+                // Deep link back to bot — triggers /start verified_CHATID
                 setTimeout(() => {
+                    const deepLink = `https://t.me/Guardian67bot?start=verified_${chatId}`;
+                    tg.openTelegramLink(deepLink);
                     tg.close();
-                }, 1500);
+                }, 1000);
             }, 800);
         }
     </script>
