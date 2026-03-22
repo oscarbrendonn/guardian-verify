@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guardian Verification</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e14;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 200, 83, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 200, 83, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(0, 150, 83, 0.06) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        /* Floating icons background */
+        .bg-icons {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 24 24' fill='none' stroke='%2300c853' stroke-width='1.5'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3C/svg%3E");
+            background-size: 80px 80px;
+            animation: bgFloat 20s linear infinite;
+        }
+
+        @keyframes bgFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-80px); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Shield icon */
+        .shield-container {
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #00c853, #00a844);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 200, 83, 0.3);
+            animation: shieldPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes shieldPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(0, 200, 83, 0.3); }
+            50% { box-shadow: 0 8px 48px rgba(0, 200, 83, 0.5); }
+        }
+
+        .shield-container svg {
+            width: 44px;
+            height: 44px;
+            fill: white;
+        }
+
+        /* Welcome text */
+        .welcome-text {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 4px;
+        }
+
+        .group-name {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+
+        /* Title */
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00e676, #00c853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 36px;
+            text-align: center;
+        }
+
+        /* Verify button */
+        .verify-btn {
+            width: 100%;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #00e676, #00c853);
+            color: #000;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verify-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .verify-btn:hover::before {
+            left: 100%;
+        }
+
+        .verify-btn:active {
+            transform: scale(0.98);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading state */
+        .verify-btn.loading {
+            pointer-events: none;
+        }
+
+        .verify-btn.loading .btn-text {
+            visibility: hidden;
+        }
+
+        .verify-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 24px; height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid rgba(0, 0, 0, 0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success state */
+        .verify-btn.success {
+            background: #00c853;
+            pointer-events: none;
+        }
+
+        /* Warning footer */
+        .warning {
+            margin-top: 32px;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 193, 7, 0.06);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .warning-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .warning-text {
+            font-size: 13px;
+            color: rgba(255, 193, 7, 0.8);
+            line-height: 1.4;
+        }
+
+        /* Footer branding */
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer svg {
+            width: 14px;
+            height: 14px;
+            fill: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-icons"></div>
+    <div class="container">
+        <div class="shield-container">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+        </div>
+
+        <div class="welcome-text" id="welcomeText">Welcome</div>
+        <div class="group-name" id="groupName"></div>
+
+        <div class="title">Human Verification</div>
+        <div class="subtitle">Verify below to be granted entry</div>
+
+        <button class="verify-btn" id="verifyBtn" onclick="handleVerify()">
+            <span class="btn-text">Click here to verify</span>
+        </button>
+
+        <div class="warning">
+            <span class="warning-icon">⚠️</span>
+            <span class="warning-text">We will never ask you for phone number or any personal information</span>
+        </div>
+
+        <div class="footer">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Guardian
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Set theme
+        document.body.style.backgroundColor = tg.themeParams.bg_color || '#0a0e14';
+
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const chatId = params.get('chat_id') || '';
+        const groupName = params.get('group_name') || '';
+
+        // Set welcome text with user name
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('welcomeText').textContent = 
+                `Welcome, ${user.first_name}`;
+        }
+
+        if (groupName) {
+            document.getElementById('groupName').textContent = decodeURIComponent(groupName);
+        }
+
+        function handleVerify() {
+            const btn = document.getElementById('verifyBtn');
+            btn.classList.add('loading');
+
+            // Small delay for visual feedback
+            setTimeout(() => {
+                // Send verification data back to bot
+                tg.sendData(JSON.stringify({
+                    action: 'verify',
+                    chat_id: chatId,
+                    timestamp: Date.now()
+                }));
+
+                btn.classList.remove('loading');
+                btn.classList.add('success');
+                btn.querySelector('.btn-text').textContent = '✓ Verified';
+                btn.querySelector('.btn-text').style.visibility = 'visible';
+
+                // Close after short delay
+                setTimeout(() => {
+                    tg.close();
+                }, 1500);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
