@@ -170,6 +170,11 @@
             pointer-events: none;
         }
 
+        .verify-btn.blocked {
+            background: linear-gradient(135deg, #ff1744, #d50000);
+            pointer-events: none;
+        }
+
         /* Warning */
         .warning {
             margin-top: 32px;
@@ -263,22 +268,225 @@
             document.getElementById('groupName').textContent = decodeURIComponent(groupName);
         }
 
-        function handleVerify() {
+        /* ═══════════════════════════════════════════════════
+           SECURITY LAYER — görünmez, arka planda çalışır
+           ═══════════════════════════════════════════════════ */
+
+        const _securityData = {};
+        const _pageLoadTime = Date.now();
+        let _interactionCount = 0;
+        let _mouseMoves = [];
+        let _touchEvents = [];
+
+        // 1. Device Fingerprint — canvas + webgl + screen + platform
+        async function _collectFingerprint() {
+            try {
+                const c = document.createElement('canvas');
+                c.width = 200; c.height = 50;
+                const ctx = c.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('G67fp_test', 2, 15);
+                ctx.fillStyle = 'rgba(102,204,0,0.7)';
+                ctx.fillText('G67fp_test', 4, 17);
+                const canvasHash = c.toDataURL().slice(-60);
+
+                let webglRenderer = 'none';
+                try {
+                    const gl = document.createElement('canvas').getContext('webgl');
+                    if (gl) {
+                        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+                        if (dbg) webglRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || 'unknown';
+                    }
+                } catch(e) {}
+
+                const signals = {
+                    cv: canvasHash,
+                    sc: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+                    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    ln: navigator.language,
+                    pf: navigator.platform,
+                    cr: navigator.hardwareConcurrency || 0,
+                    gl: webglRenderer.slice(0, 50),
+                    tp: navigator.maxTouchPoints || 0,
+                    dm: navigator.deviceMemory || 0,
+                    dpr: window.devicePixelRatio || 1,
+                };
+
+                const raw = JSON.stringify(signals);
+                const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch(e) {
+                return 'err_' + Math.random().toString(36).slice(2, 10);
+            }
+        }
+
+        // 2. Bot Detection — headless/automation sinyalleri
+        function _detectBot() {
+            const flags = [];
+
+            // webdriver flag
+            if (navigator.webdriver) flags.push('wd');
+
+            // headless Chrome
+            if (/HeadlessChrome/.test(navigator.userAgent)) flags.push('hc');
+
+            // phantom/selenium
+            if (window._phantom || window.__nightmare || window.callPhantom) flags.push('ph');
+            if (window.document.__selenium_unwrapped || window.document.__webdriver_evaluate) flags.push('se');
+
+            // chrome olmadan chrome user-agent
+            if (/Chrome/.test(navigator.userAgent) && !window.chrome) flags.push('fc');
+
+            // permission anomaly
+            try {
+                if (navigator.permissions) {
+                    navigator.permissions.query({name: 'notifications'}).then(r => {
+                        if (Notification.permission === 'denied' && r.state === 'prompt') flags.push('pm');
+                    }).catch(() => {});
+                }
+            } catch(e) {}
+
+            // plugin sayısı (headless = 0)
+            if (navigator.plugins && navigator.plugins.length === 0 && !/Mobile|Android|iPhone/.test(navigator.userAgent)) {
+                flags.push('np');
+            }
+
+            // languages boş
+            if (!navigator.languages || navigator.languages.length === 0) flags.push('nl');
+
+            return flags;
+        }
+
+        // 3. Behavior Analysis — mouse/touch event tracking
+        document.addEventListener('mousemove', (e) => {
+            if (_mouseMoves.length < 20) {
+                _mouseMoves.push({ x: e.clientX, y: e.clientY, t: Date.now() - _pageLoadTime });
+            }
+            _interactionCount++;
+        }, { passive: true });
+
+        document.addEventListener('touchstart', (e) => {
+            if (_touchEvents.length < 10) {
+                _touchEvents.push({ t: Date.now() - _pageLoadTime });
+            }
+            _interactionCount++;
+        }, { passive: true });
+
+        document.addEventListener('scroll', () => { _interactionCount++; }, { passive: true });
+
+        // 4. Hız kontrolü — insanlar 800ms'den önce tıklayamaz
+        function _getTimeOnPage() {
+            return Date.now() - _pageLoadTime;
+        }
+
+        // 5. Behavior score hesapla
+        function _calcBehaviorScore() {
+            let score = 0;
+
+            // Sayfada geçen süre (ms)
+            const timeOnPage = _getTimeOnPage();
+            if (timeOnPage > 2000) score += 20;    // 2sn+ = insan
+            if (timeOnPage > 5000) score += 10;    // 5sn+ = kesin insan
+            if (timeOnPage < 500) score -= 50;     // 0.5sn = kesin bot
+
+            // Mouse hareketleri
+            if (_mouseMoves.length > 3) score += 15;
+            if (_mouseMoves.length > 10) score += 10;
+
+            // Touch events (mobil)
+            if (_touchEvents.length > 0) score += 15;
+
+            // Genel etkileşim
+            if (_interactionCount > 2) score += 10;
+            if (_interactionCount > 10) score += 10;
+
+            // Mouse hareket çeşitliliği (bot = düz çizgi)
+            if (_mouseMoves.length >= 3) {
+                const dx = new Set(_mouseMoves.map(m => Math.round(m.x / 20)));
+                const dy = new Set(_mouseMoves.map(m => Math.round(m.y / 20)));
+                if (dx.size > 2 && dy.size > 2) score += 10;  // çeşitli = insan
+            }
+
+            return Math.min(score, 100);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           VERIFY HANDLER — görünüm aynı, arka plan güçlü
+           ═══════════════════════════════════════════════════ */
+
+        async function handleVerify() {
             const btn = document.getElementById('verifyBtn');
+
+            // Çift tıklama koruması
+            if (btn.classList.contains('loading') || btn.classList.contains('success')) return;
+
             btn.classList.add('loading');
 
-            setTimeout(() => {
-                btn.classList.remove('loading');
-                btn.classList.add('success');
-                btn.querySelector('.btn-text').textContent = '✓ Verified';
-                btn.querySelector('.btn-text').style.visibility = 'visible';
+            try {
+                // Paralel: fingerprint + bot check
+                const [fingerprint, botFlags] = await Promise.all([
+                    _collectFingerprint(),
+                    Promise.resolve(_detectBot())
+                ]);
 
+                const behaviorScore = _calcBehaviorScore();
+                const timeOnPage = _getTimeOnPage();
+
+                // Security payload — deep link'e encode
+                // fp: ilk 16 char fingerprint
+                // bs: behavior score (0-100)
+                // bf: bot flags (virgülle ayrılmış)
+                // tp: time on page (ms)
+                const fp = fingerprint.slice(0, 16);
+                const bs = Math.min(behaviorScore, 99);
+                const bf = botFlags.length > 0 ? botFlags.join('') : '0';
+
+                // Deep link format: verified_CHATID_FPXXXXXXXXXXXXXX_BSXX_BFXXX
+                const securitySuffix = `_fp${fp}_bs${bs}_bf${bf}`;
+
+                // Bot detected = block
+                if (botFlags.length >= 3 || behaviorScore < -20) {
+                    btn.classList.remove('loading');
+                    btn.classList.add('blocked');
+                    btn.querySelector('.btn-text').textContent = '✗ Verification failed';
+                    btn.querySelector('.btn-text').style.visibility = 'visible';
+                    return;
+                }
+
+                // Çok hızlı tıklama = şüpheli ama geçir (bot tarafında kontrol edilecek)
+                // Normal flow
                 setTimeout(() => {
-                    const deepLink = `https://t.me/Guardian67bot?start=verified_${chatId}`;
-                    tg.openTelegramLink(deepLink);
-                    tg.close();
-                }, 1000);
-            }, 800);
+                    btn.classList.remove('loading');
+                    btn.classList.add('success');
+                    btn.querySelector('.btn-text').textContent = '✓ Verified';
+                    btn.querySelector('.btn-text').style.visibility = 'visible';
+
+                    setTimeout(() => {
+                        const deepLink = `https://t.me/Guardian67bot?start=verified_${chatId}${securitySuffix}`;
+                        tg.openTelegramLink(deepLink);
+                        tg.close();
+                    }, 1000);
+                }, 800);
+
+            } catch(e) {
+                // Hata durumunda yine de geçir (UX bozulmasın)
+                setTimeout(() => {
+                    btn.classList.remove('loading');
+                    btn.classList.add('success');
+                    btn.querySelector('.btn-text').textContent = '✓ Verified';
+                    btn.querySelector('.btn-text').style.visibility = 'visible';
+
+                    setTimeout(() => {
+                        const deepLink = `https://t.me/Guardian67bot?start=verified_${chatId}`;
+                        tg.openTelegramLink(deepLink);
+                        tg.close();
+                    }, 1000);
+                }, 800);
+            }
         }
     </script>
 </body>
